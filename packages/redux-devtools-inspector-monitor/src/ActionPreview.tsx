@@ -10,6 +10,7 @@ import ActionPreviewHeader from './ActionPreviewHeader';
 import DiffTab from './tabs/DiffTab';
 import StateTab from './tabs/StateTab';
 import ActionTab from './tabs/ActionTab';
+import StateFilterTab from './tabs/StateFilterTab';
 
 export interface TabComponentProps<S, A extends Action<unknown>> {
   labelRenderer: LabelRenderer;
@@ -46,6 +47,10 @@ const DEFAULT_TABS = [
   {
     name: 'State',
     component: StateTab,
+  },
+  {
+    name: 'StateFilter',
+    component: StateFilterTab,
   },
 ];
 

@@ -6,6 +6,7 @@ import {
   StateTab,
   ActionTab,
   DiffTab,
+  StateFilterTab,
 } from '@redux-devtools/inspector-monitor';
 import { Action } from 'redux';
 import { selectMonitorTab } from '../../../actions';
@@ -68,7 +69,7 @@ class SubTabs extends Component<Props> {
     this.tabs = [
       {
         name: 'Tree',
-        component: parentTab === 'Action' ? ActionTab : StateTab,
+        component: parentTab === 'Action' ? ActionTab : parentTab === 'StateFilter' ? StateFilterTab : StateTab,
         selector: () => this.props,
       },
       {

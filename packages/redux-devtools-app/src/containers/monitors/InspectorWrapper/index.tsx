@@ -16,6 +16,10 @@ const DEFAULT_TABS = [
     component: SubTabs,
   },
   {
+    name: 'StateFilter',
+    component: SubTabs,
+  },
+  {
     name: 'Diff',
     component: SubTabs,
   },
