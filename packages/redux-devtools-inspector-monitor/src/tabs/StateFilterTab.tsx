@@ -57,7 +57,7 @@ const StateFilterTab: React.FunctionComponent<
   }, [nextState]);
   return (
     <>
-    <input placeholder='Enter keys (comma separated) to filter state' style={{width: '95%', margin: '1rem'}} value={value} onChange={(e) => {
+    <input {...styling('actionListHeaderSearch')} placeholder='Enter keys (comma separated) to filter state' style={{width: '95%'}} value={value} onChange={(e) => {
       setValue(e.target.value);
       getFilteredState(e.target.value);
     }

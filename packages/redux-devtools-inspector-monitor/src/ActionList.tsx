@@ -20,7 +20,19 @@ function getTimestamps<A extends Action<unknown>>(
     previous: idx ? actions[prevActionId].timestamp : 0,
   };
 }
+type Entry<T> = {
+  [K in keyof T]: [K, T[K]]
+}[keyof T]
 
+function filterObject<T extends object>(
+  obj: T,
+  fn: (entry: Entry<T>, i: number, arr: Entry<T>[]) => boolean
+) {
+  return Object.fromEntries(
+    (Object.entries(obj) as Entry<T>[]).filter(fn)
+  )
+  // as Partial<T>
+}
 interface Props<A extends Action<unknown>> {
   actions: { [actionId: number]: PerformAction<A> };
   actionIds: number[];
@@ -43,10 +55,22 @@ interface Props<A extends Action<unknown>> {
   currentActionId: number;
   lastActionId: number;
 }
-
+interface State<A extends Action<unknown>> {
+  filteredActions: { [actionId: number]: PerformAction<A> };
+  actionsToRemove: string;
+}
 export default class ActionList<
   A extends Action<unknown>
-> extends PureComponent<Props<A>> {
+> extends PureComponent<Props<A>, State<A>> {
+  constructor(props: Props<A>) {
+    super(props);
+
+    this.state = {
+      filteredActions: props.actions,
+      actionsToRemove: '',
+    };
+  }
+
   node?: HTMLDivElement | null;
   scrollDown?: boolean;
   drake?: Drake;
@@ -61,6 +85,9 @@ export default class ActionList<
         Math.abs(scrollHeight - (scrollTop + offsetHeight)) < 50;
     } else {
       this.scrollDown = false;
+    }
+    if(this.props.actions !== nextProps.actions){
+      this.setState({filteredActions:nextProps.actions}, ()=>this.hideActtions());
     }
   }
 
@@ -107,6 +134,32 @@ export default class ActionList<
     this.node = node;
   };
 
+  setActionsToRemove = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputAction = e.target.value;
+    this.setState({actionsToRemove: inputAction}, ()=>this.hideActtions());
+  }
+
+  hideActtions = () => {
+    const inputAction = this.state.actionsToRemove;
+    const actions = {...this.props.actions};
+    let filteredActions = {...actions};
+    if(inputAction){
+      if(inputAction.includes(',')){
+        const inputActions = inputAction.split(',');
+        const toRemove = new Set([...inputActions]);
+        filteredActions = filterObject(actions, ([key, value]: any) =>{
+          const actionType:string = value.action.type;
+          return !toRemove.has(actionType);
+        })
+      }else{
+        filteredActions = filterObject(actions, ([key, value]) =>value.action.type !== inputAction);
+      }
+      this.setState({filteredActions});
+    }else{
+      this.setState({filteredActions});
+    }
+  }
+
   render() {
     const {
       styling,
@@ -129,13 +182,13 @@ export default class ActionList<
     } = this.props;
     const lowerSearchValue = searchValue && searchValue.toLowerCase();
     const filteredActionIds = searchValue
-      ? actionIds.filter(
+      ? Object.keys(this.state.filteredActions).map(Number).filter(
           (id) =>
-            (actions[id].action.type as string)
+            (this.state.filteredActions[id].action.type as string)
               .toLowerCase()
               .indexOf(lowerSearchValue as string) !== -1
         )
-      : actionIds;
+      : Object.keys(this.state.filteredActions).map(Number);
 
     return (
       <div
@@ -153,8 +206,9 @@ export default class ActionList<
           onSweep={onSweep}
           hideMainButtons={hideMainButtons}
           hasSkippedActions={skippedActionIds.length > 0}
-          hasStagedActions={actionIds.length > 1}
+          hasStagedActions={Object.keys(this.state.filteredActions).map(Number).length > 1}
           searchValue={searchValue}
+          actionFilterHandler={this.setActionsToRemove}
         />
         <div
           data-testid="actionListRows"
@@ -174,13 +228,13 @@ export default class ActionList<
                 actionId === selectedActionId
               }
               isInFuture={
-                actionIds.indexOf(actionId) > actionIds.indexOf(currentActionId)
+                Object.keys(this.state.filteredActions).map(Number).indexOf(actionId) > Object.keys(this.state.filteredActions).map(Number).indexOf(currentActionId)
               }
               onSelect={(e: React.MouseEvent<HTMLDivElement>) =>
                 onSelect(e, actionId)
               }
-              timestamps={getTimestamps(actions, actionIds, actionId)}
-              action={actions[actionId].action}
+              timestamps={getTimestamps(actions, Object.keys(this.state.filteredActions).map(Number), actionId)}
+              action={this.state.filteredActions[actionId].action}
               onToggleClick={() => onToggleAction(actionId)}
               onJumpClick={() => onJumpToState(actionId)}
               onCommitClick={() => onCommit()}

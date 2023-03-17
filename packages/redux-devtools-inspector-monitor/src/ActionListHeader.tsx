@@ -17,6 +17,7 @@ interface Props {
   hasSkippedActions: boolean;
   hasStagedActions: boolean;
   searchValue: string | undefined;
+  actionFilterHandler: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 const ActionListHeader: FunctionComponent<Props> = ({
@@ -28,13 +29,19 @@ const ActionListHeader: FunctionComponent<Props> = ({
   onSweep,
   hideMainButtons,
   searchValue,
+  actionFilterHandler,
 }) => (
   <div {...styling('actionListHeader')}>
     <input
       {...styling('actionListHeaderSearch')}
       onChange={(e) => onSearch(e.target.value)}
-      placeholder="filter..."
+      placeholder="filter specific action ..."
       value={searchValue}
+    />
+    <input
+      {...styling('actionListHeaderSearch')}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => actionFilterHandler(e)}
+      placeholder={'filter to exclude actions (comma separated) ...'}
     />
     {!hideMainButtons && (
       <div {...styling('actionListHeaderWrapper')}>
