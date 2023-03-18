@@ -19,63 +19,79 @@ const StateFilterTab: React.FunctionComponent<
 }) => {
   const [value, setValue] = useState('');
   const [stateData, setStateData] = useState(nextState);
-  const idx = (p:any, o:any) => p.reduce((xs:{[k: string]: any}, x:string) => ((xs && (xs[x?.trim()]) !=='undefined' || xs[x] !== null )) ? xs[x] : null, o)
+
+  const idx = (p: any, o: any) =>
+    p.reduce(
+      (xs: { [k: string]: any }, x: string) =>
+        (xs && xs?.[x?.trim()] !== 'undefined') || xs?.[x] !== null ? xs?.[x] : null,
+      o
+    );
+
   const getFilteredState = (targetValue: string) => {
-    if(!targetValue){
+    if (!targetValue) {
       setStateData(nextState);
       return;
     }
-    let nextStateAltered: {[k: string]: any} = {};
-      // console.log(JSON.stringify(nextState))
-      const inputValue = targetValue.includes(',') ? targetValue.split(',') : targetValue;
-      if(Array.isArray(inputValue)){
+    try{
+      let nextStateAltered: { [k: string]: any } = {};
+      const inputValue = targetValue.includes(',')
+        ? targetValue.split(',')
+        : targetValue;
+      if (Array.isArray(inputValue)) {
         inputValue.forEach((val) => {
           const key = val?.trim();
-          const path = key.includes('.') ? key.split('.') : key;
-          console.log('idx', Array.isArray(path) ? idx(path,nextState) : path);
-          if(Array.isArray(path)){
-            nextStateAltered[path.join('.')] = idx(path,nextState)
-          }else if(nextState[key]){
+          const convertedKey = key.replaceAll('[','.').replaceAll(']','').replaceAll(/'/g, '')
+          const path = convertedKey.includes('.') ? convertedKey.split('.') : key;
+          if (Array.isArray(path)) {
+            nextStateAltered[path.join('.')] = idx(path, nextState);
+          } else if (nextState[key]) {
             nextStateAltered[key] = nextState[key];
           }
-        })
-      }else {
-        const path = inputValue.includes('.') ? inputValue.split('.') : inputValue;
-          console.log('path ',path)
-          console.log('idx inputValue', Array.isArray(path) ? idx(path,nextState) : path);
-          if(Array.isArray(path)){
-            nextStateAltered[path.join('.')] = idx(path,nextState)
-          }else if(nextState[inputValue]){
-            nextStateAltered = nextState[inputValue];
-          }
+        });
+      } else {
+        const convertedInput = inputValue.replaceAll('[','.').replaceAll(']','').replaceAll(/'/g, '')
+        const path = convertedInput.includes('.')
+          ? convertedInput.split('.')
+          : inputValue;
+        if (Array.isArray(path)) {
+          nextStateAltered[path.join('.')] = idx(path, nextState);
+        } else if (nextState[inputValue]) {
+          nextStateAltered = nextState[inputValue];
+        }
       }
       setStateData(nextStateAltered);
-      console.log('nextStateAltered',nextStateAltered)
-  }
-  useEffect(()=>{
+    }catch(e){
+      console.error(e);
+      setStateData(nextState);
+    }
+  };
+
+  useEffect(() => {
     getFilteredState(value);
-  }, [nextState]);
+  }, [nextState, value]);
+
   return (
     <>
-    <input {...styling('actionListHeaderSearch')} placeholder='Enter keys (comma separated) to filter state' style={{width: '95%'}} value={value} onChange={(e) => {
-      setValue(e.target.value);
-      getFilteredState(e.target.value);
-    }
-    }/>
-    <JSONTree
-      labelRenderer={labelRenderer}
-      theme={getJsonTreeTheme(base16Theme)}
-      data={stateData}
-      getItemString={(type, data) =>
-        getItemString(styling, type, data, dataTypeKey, isWideLayout)
-      }
-      invertTheme={invertTheme}
-      hideRoot
-    />
-    
+      <input
+        {...styling('actionListHeaderSearch')}
+        placeholder="Enter keys (comma separated) to filter state"
+        style={{ width: '95%' }}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <JSONTree
+        labelRenderer={labelRenderer}
+        theme={getJsonTreeTheme(base16Theme)}
+        data={stateData}
+        getItemString={(type, data) =>
+          getItemString(styling, type, data, dataTypeKey, isWideLayout)
+        }
+        invertTheme={invertTheme}
+        hideRoot
+      />
     </>
   );
-}
+};
 
 StateFilterTab.propTypes = {
   nextState: PropTypes.any.isRequired,
