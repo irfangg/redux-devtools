@@ -32,7 +32,7 @@ const ActionPreviewHeader: FunctionComponent<
           ) : (
             tabName
           )}
-          <span>:{inspectedPath.join('.')}</span>
+          <span>{inspectedPath.join('.')}</span>
         </div>
       );
     } else {
