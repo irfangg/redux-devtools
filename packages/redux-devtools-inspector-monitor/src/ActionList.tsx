@@ -143,19 +143,24 @@ export default class ActionList<
     const inputAction = this.state.actionsToRemove;
     const actions = {...this.props.actions};
     let filteredActions = {...actions};
-    if(inputAction){
-      if(inputAction.includes(',')){
-        const inputActions = inputAction.split(',');
-        const toRemove = new Set([...inputActions]);
-        filteredActions = filterObject(actions, ([key, value]: any) =>{
-          const actionType:string = value.action.type;
-          return !toRemove.has(actionType);
-        })
+    try{
+      if(inputAction){
+        if(inputAction.includes(',')){
+          const inputActions = inputAction.split(',')?.map(i => i.trim());
+          const toRemove = new Set([...inputActions]);
+          filteredActions = filterObject(actions, ([key, value]: any) =>{
+            const actionType:string = value.action.type;
+            return !toRemove.has(actionType);
+          })
+        }else{
+          filteredActions = filterObject(actions, ([key, value]) =>value.action.type !== inputAction?.trim());
+        }
+        this.setState({filteredActions});
       }else{
-        filteredActions = filterObject(actions, ([key, value]) =>value.action.type !== inputAction);
+        this.setState({filteredActions});
       }
-      this.setState({filteredActions});
-    }else{
+    }catch(e){
+      console.error(e);
       this.setState({filteredActions});
     }
   }

@@ -15,55 +15,83 @@ interface Props<S, A extends Action<unknown>> {
 
 const ActionPreviewHeader: FunctionComponent<
   Props<unknown, Action<unknown>>
-> = ({ styling, inspectedPath, onInspectPath, tabName, onSelectTab, tabs }) => (
-  <div key="previewHeader" {...styling('previewHeader')}>
-    <div {...styling('tabSelector')}>
-      {tabs.map((tab) => (
-        <div
-          onClick={() => onSelectTab(tab.name)}
-          key={tab.name}
-          {...styling(
-            [
-              'selectorButton',
-              tab.name === tabName && 'selectorButtonSelected',
-            ],
-            tab.name === tabName
+> = ({ styling, inspectedPath, onInspectPath, tabName, onSelectTab, tabs }) => {
+  const inspectedKeysToDisplay = () => {
+    if (tabName === 'StateFilter') {
+      return (
+        <div {...styling('inspectedPath')}>
+          {inspectedPath.length ? (
+            <span {...styling('inspectedPathKey')}>
+              <a
+                onClick={() => onInspectPath([])}
+                {...styling('inspectedPathKeyLink')}
+              >
+                {tabName}
+              </a>
+            </span>
+          ) : (
+            tabName
           )}
-        >
-          {tab.name}
+          <span>:{inspectedPath.join('.')}</span>
         </div>
-      ))}
-    </div>
-    <div {...styling('inspectedPath')}>
-      {inspectedPath.length ? (
-        <span {...styling('inspectedPathKey')}>
-          <a
-            onClick={() => onInspectPath([])}
-            {...styling('inspectedPathKeyLink')}
+      );
+    } else {
+      return (
+        <div {...styling('inspectedPath')}>
+          {inspectedPath.length ? (
+            <span {...styling('inspectedPathKey')}>
+              <a
+                onClick={() => onInspectPath([])}
+                {...styling('inspectedPathKeyLink')}
+              >
+                {tabName}
+              </a>
+            </span>
+          ) : (
+            tabName
+          )}
+          {inspectedPath.map((key, idx) =>
+            idx === inspectedPath.length - 1 ? (
+              <span key={key}>{key}</span>
+            ) : (
+              <span key={key} {...styling('inspectedPathKey')}>
+                <a
+                  onClick={() => onInspectPath(inspectedPath.slice(0, idx + 1))}
+                  {...styling('inspectedPathKeyLink')}
+                >
+                  {key}
+                </a>
+              </span>
+            )
+          )}
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div key="previewHeader" {...styling('previewHeader')}>
+      <div {...styling('tabSelector')}>
+        {tabs.map((tab) => (
+          <div
+            onClick={() => onSelectTab(tab.name)}
+            key={tab.name}
+            {...styling(
+              [
+                'selectorButton',
+                tab.name === tabName && 'selectorButtonSelected',
+              ],
+              tab.name === tabName
+            )}
           >
-            {tabName}
-          </a>
-        </span>
-      ) : (
-        tabName
-      )}
-      {inspectedPath.map((key, idx) =>
-        idx === inspectedPath.length - 1 ? (
-          <span key={key}>{key}</span>
-        ) : (
-          <span key={key} {...styling('inspectedPathKey')}>
-            <a
-              onClick={() => onInspectPath(inspectedPath.slice(0, idx + 1))}
-              {...styling('inspectedPathKeyLink')}
-            >
-              {key}
-            </a>
-          </span>
-        )
-      )}
+            {tab.name}
+          </div>
+        ))}
+      </div>
+      {inspectedKeysToDisplay()}
     </div>
-  </div>
-);
+  );
+};
 
 ActionPreviewHeader.propTypes = {
   tabs: PropTypes.array.isRequired,

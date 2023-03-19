@@ -28,6 +28,7 @@ export interface TabComponentProps<S, A extends Action<unknown>> {
   nextState: S;
   monitorState: DevtoolsInspectorState;
   updateMonitorState: (monitorState: Partial<DevtoolsInspectorState>) => void;
+  onInspectPath: (path: (string | number)[]) => void;
 }
 
 export interface Tab<S, A extends Action<unknown>> {
@@ -144,6 +145,7 @@ class ActionPreview<S, A extends Action<unknown>> extends Component<
                 nextState,
                 monitorState,
                 updateMonitorState,
+                onInspectPath,
               }}
             />
           </div>
@@ -166,33 +168,15 @@ class ActionPreview<S, A extends Action<unknown>> extends Component<
         >
           {key}
         </span>
-        {this.props.tabName === 'StateFilter' ? (
-          <span
-            {...styling('treeItemPin')}
-            onClick={() =>
-              {
-                const pathToCopy = [
-                  ...inspectedPath.slice(0, inspectedPath.length - 1),
-                  ...[key, ...rest].reverse(),
-                ]?.join('.');
-                alert('copy path :'+ pathToCopy);
-              }
-            }
-          >
-            {'(show path)'}
-          </span>
-        ):(
-          <span
+        <span
             {...styling('treeItemPin')}
             onClick={() =>onInspectPath([
               ...inspectedPath.slice(0, inspectedPath.length - 1),
               ...[key, ...rest].reverse(),
             ])}
           >
-            {'(pin)'}
+            {this.props.tabName === 'StateFilter' ? '(show path)' : '(pin)'}
           </span>
-        )
-        }
         {!expanded && ': '}
       </span>
     );

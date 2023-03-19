@@ -16,6 +16,7 @@ const StateFilterTab: React.FunctionComponent<
   labelRenderer,
   dataTypeKey,
   isWideLayout,
+  onInspectPath
 }) => {
   const [value, setValue] = useState('');
   const [stateData, setStateData] = useState(nextState);
@@ -77,7 +78,10 @@ const StateFilterTab: React.FunctionComponent<
         placeholder="Enter keys (comma separated) to filter state"
         style={{ width: '95%' }}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value);
+          onInspectPath([]);
+        }}
       />
       <JSONTree
         labelRenderer={labelRenderer}
