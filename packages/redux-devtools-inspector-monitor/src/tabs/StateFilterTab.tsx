@@ -16,9 +16,10 @@ const StateFilterTab: React.FunctionComponent<
   labelRenderer,
   dataTypeKey,
   isWideLayout,
-  onInspectPath
+  onInspectPath,
+  filterStateQuery,
+  handleFilterStateQuery
 }) => {
-  const [value, setValue] = useState('');
   const [stateData, setStateData] = useState(nextState);
 
   const idx = (p: any, o: any) =>
@@ -28,16 +29,16 @@ const StateFilterTab: React.FunctionComponent<
       o
     );
 
-  const getFilteredState = (targetValue: string) => {
-    if (!targetValue) {
+  const getFilteredState = () => {
+    if (!filterStateQuery) {
       setStateData(nextState);
       return;
     }
     try{
       let nextStateAltered: { [k: string]: any } = {};
-      const inputValue = targetValue.includes(',')
-        ? targetValue.split(',')
-        : targetValue;
+      const inputValue = filterStateQuery.includes(',')
+        ? filterStateQuery.split(',')
+        : filterStateQuery;
       if (Array.isArray(inputValue)) {
         inputValue.forEach((val) => {
           const key = val?.trim();
@@ -68,8 +69,8 @@ const StateFilterTab: React.FunctionComponent<
   };
 
   useEffect(() => {
-    getFilteredState(value);
-  }, [nextState, value]);
+    getFilteredState();
+  }, [nextState, filterStateQuery]);
 
   return (
     <>
@@ -77,9 +78,9 @@ const StateFilterTab: React.FunctionComponent<
         {...styling('actionListHeaderSearch')}
         placeholder="Enter keys (comma separated) to filter state"
         style={{ width: '95%' }}
-        value={value}
+        value={filterStateQuery}
         onChange={(e) => {
-          setValue(e.target.value);
+          handleFilterStateQuery(e.target.value);
           onInspectPath([]);
         }}
       />

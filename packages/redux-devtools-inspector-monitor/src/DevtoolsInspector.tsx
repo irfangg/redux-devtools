@@ -189,6 +189,7 @@ interface State<S, A extends Action<unknown>> {
   error: string | undefined;
   isWideLayout: boolean;
   themeState: { base16Theme: Base16Theme; styling: StylingFunction };
+  filterStateQuery: string;
 }
 
 class DevtoolsInspector<S, A extends Action<unknown>> extends PureComponent<
@@ -199,6 +200,7 @@ class DevtoolsInspector<S, A extends Action<unknown>> extends PureComponent<
     ...createIntermediateState(this.props, this.props.monitorState),
     isWideLayout: false,
     themeState: createThemeState(this.props),
+    filterStateQuery: 'irfan',
   };
 
   static propTypes = {
@@ -248,6 +250,10 @@ class DevtoolsInspector<S, A extends Action<unknown>> extends PureComponent<
 
   componentWillUnmount() {
     clearTimeout(this.updateSizeTimeout);
+  }
+
+  updateFilterStateQuery = (value: string) => {
+    this.setState({filterStateQuery: value})
   }
 
   updateMonitorState = (monitorState: Partial<DevtoolsInspectorState>) => {
@@ -373,6 +379,8 @@ class DevtoolsInspector<S, A extends Action<unknown>> extends PureComponent<
           }
           inspectedPath={monitorState[inspectedPathType]}
           onSelectTab={this.handleSelectTab}
+          filterStateQuery={this.state.filterStateQuery }
+          handleFilterStateQuery={this.updateFilterStateQuery}
         />
       </div>
     );

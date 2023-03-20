@@ -29,6 +29,8 @@ export interface TabComponentProps<S, A extends Action<unknown>> {
   monitorState: DevtoolsInspectorState;
   updateMonitorState: (monitorState: Partial<DevtoolsInspectorState>) => void;
   onInspectPath: (path: (string | number)[]) => void;
+  filterStateQuery: string,
+  handleFilterStateQuery: (q:string) => void,
 }
 
 export interface Tab<S, A extends Action<unknown>> {
@@ -76,6 +78,8 @@ interface Props<S, A extends Action<unknown>> {
   onInspectPath: (path: (string | number)[]) => void;
   inspectedPath: (string | number)[];
   onSelectTab: (tabName: string) => void;
+  filterStateQuery:string,
+  handleFilterStateQuery: (q:string) => void,
 }
 
 class ActionPreview<S, A extends Action<unknown>> extends Component<
@@ -107,6 +111,8 @@ class ActionPreview<S, A extends Action<unknown>> extends Component<
       dataTypeKey,
       monitorState,
       updateMonitorState,
+      filterStateQuery,
+      handleFilterStateQuery
     } = this.props;
 
     const renderedTabs: Tab<S, A>[] =
@@ -146,6 +152,8 @@ class ActionPreview<S, A extends Action<unknown>> extends Component<
                 monitorState,
                 updateMonitorState,
                 onInspectPath,
+                filterStateQuery,
+                handleFilterStateQuery
               }}
             />
           </div>
